@@ -7,6 +7,12 @@ taylor_ucc
 
 Truncated UCCSD methods
 
+-D1 is reported for all methods but I'm not sure it's right when computed manually.
+
+-In general I don't expect this code to work for uhf.
+
+-Test/example file is h4_test.py.
+
 ### Copyright
 
 Copyright (c) 2022, Harper Grimsley
