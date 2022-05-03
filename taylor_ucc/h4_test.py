@@ -8,13 +8,14 @@ geom = "H 0 0 0; H 0 0 1; H 0 0 2; H 0 0 3"
 mol = molecule(geom, "sto-3g", "rhf", chkfile = f"h4.chk", read = False, ccsd = True, ccsdt = True)
 scf = mol.hf
 mp2 = mol.canonical_mp2()[0]
-lccsd = mol.lccsd()[0]
-uccsd2 = mol.uccsd2()[0]
 cisd = mol.cisd()[0]
+lccsd = mol.lccsd()[0]
+uccsd2 = mol.o2d2_uccsd()[0]
+
 ccsd = mol.ccsd_energy
 ccsdt = mol.ccsdt_energy
-enucc3 = mol.UCC_2_HATER3()[0]
-d_inf = mol.UCC_2_HATERI(guess = 'enucc')[0]
+enucc3 = mol.o2d3_uccsd()[0]
+d_inf = mol.o2di_uccsd(guess = 'enucc')[0]
 
 natural_C = mol.mp2_natural()
 
@@ -27,16 +28,13 @@ mf.kernel()
 assert(mf.converged == True)
 dft_C = mf.mo_coeff
 
-mol = molecule(geom, "sto-3g", "rhf", manual_C = dft_C, chkfile = f"h4.chk", read = True, pseudo_canonicalize = False, save = True)
-dft_uccsd2 = mol.uccsd2()[0]
-dft_enucc3 = mol.UCC_2_HATER3()[0]
-dft_t_uccsd2 = mol.uccsd2(trotter = 'sd')[0]
-dft_t_enucc3 = mol.UCC_2_HATER3(trotter = 'sd')[0]
-dft_d_inf = mol.UCC_2_HATERI(guess = 'enucc')[0]
-dft_td_inf = mol.UCC_2_HATERI(guess = 'enucc', trotter = 'sd')[0]
-
-print("DFT C:")
-print(repr(dft_C), flush = True)
+mol = molecule(geom, "sto-3g", "rhf", manual_C = dft_C, chkfile = f"h4.chk", read = True, semi_canonical = False)
+dft_uccsd2 = mol.o2d2_uccsd()[0]
+dft_enucc3 = mol.o2d3_uccsd()[0]
+dft_t_uccsd2 = mol.o2d2_uccsd(trotter = 'sd')[0]
+dft_t_enucc3 = mol.o2d3_uccsd(trotter = 'sd')[0]
+dft_d_inf = mol.o2di_uccsd(guess = 'enucc')[0]
+dft_td_inf = mol.o2di_uccsd(guess = 'enucc', trotter = 'sd')[0]
 
 #Test results available in Psi4:
 assert(abs(scf + 2.098545936829916) < 1e-7)
