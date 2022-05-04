@@ -1,8 +1,8 @@
 taylor_ucc
 ==============================
 [//]: # (Badges)
-[![GitHub Actions Build Status](https://github.com/REPLACE_WITH_OWNER_ACCOUNT/taylor_ucc/workflows/CI/badge.svg)](https://github.com/REPLACE_WITH_OWNER_ACCOUNT/taylor_ucc/actions?query=workflow%3ACI)
-[![codecov](https://codecov.io/gh/REPLACE_WITH_OWNER_ACCOUNT/taylor_ucc/branch/master/graph/badge.svg)](https://codecov.io/gh/REPLACE_WITH_OWNER_ACCOUNT/taylor_ucc/branch/master)
+[![GitHub Actions Build Status](https://github.com/hrgrimsl/taylor_ucc/workflows/CI/badge.svg)](https://github.com/hrgrimsl/taylor_ucc/actions?query=workflow%3ACI)
+[![codecov](https://codecov.io/gh/hrgrimsl/taylor_ucc/branch/master/graph/badge.svg)](https://codecov.io/gh/hrgrimsl/taylor_ucc/branch/master)
 
 
 Truncated UCCSD methods
@@ -11,7 +11,7 @@ Truncated UCCSD methods
 
 -In general I don't expect this code to work for uhf.
 
--Test/example file is h4_test.py.
+-Test/example file is tests/test_h4.py.
 
 ### Copyright
 

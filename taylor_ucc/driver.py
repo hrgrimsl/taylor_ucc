@@ -1,5 +1,5 @@
-from pyscf_backend import *
-from contractions import *
+from taylor_ucc.pyscf_backend import *
+from taylor_ucc.contractions import *
 from opt_einsum import contract
 from scipy.sparse.linalg import *
 from scipy.optimize import minimize
