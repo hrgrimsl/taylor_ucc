@@ -8,13 +8,14 @@ dependencies:
     # Base depends
   - python
   - pip
+    - pyscf
+    - python-git
+    - opt_einsum
 
     #Package dependencies
-  - pyscf
   - numpy
-  - opt_einsum
   - scipy
-  - python-git
+
 
     # Testing
   - pytest
