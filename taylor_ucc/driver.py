@@ -64,25 +64,26 @@ class molecule():
 
     Methods
     -------
-    canonical_mp2()
+    canonical_mp2(self)
         Computes the MP2 energy assuming canonical orbitals
 
-    hylleraas_mp2()
+    hylleraas_mp2(self)
         Computes the MP2 energy iteratively
 
-    cisd()
+    cisd(self)
         Computes the CISD energy
 
-    lccsd(tol = 1e-6):
+    lccsd(self, tol = 1e-6):
         Computes the LCCSD energy.
     
-    o2d2_uccsd(tol = 1e-6, trotter = False):
+    o2d2_uccsd(self, tol = 1e-6, trotter = False):
         Computes the O2D2_UCCSD energy.
 
-    o2d3_uccsd(guess = 'hf', trotter = False, tol = 1e-5):
+    o2d3_uccsd(self, guess = 'hf', trotter = False, tol = 1e-5):
         Computes the O2D3_UCCSD energy.
 
-    o2di_uccsd(guess = 'hf', trotter = False, tol = 1e-5):
+    o2di_uccsd(self, guess = 'hf', trotter = False, tol = 1e-5):
+        Computes the O2D-Infinity UCCSD energy.
     """
 
     def __init__(self, geometry, basis, reference, charge = 0, unpaired = 0, conv_tol = 1e-12, read = False, ccsd = False, ccsdt = False, chkfile = None, semi_canonical = False, manual_C = None, loc = False):

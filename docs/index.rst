@@ -5,13 +5,15 @@
 
 Welcome to taylor_ucc's documentation!
 =========================================================
+taylor_ucc is a Python package for computing single-point energies of molecules using approximations based on truncation of the Taylor series in the t-amplitudes about a reference.
+
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
    getting_started
-   api
+
 
 
 

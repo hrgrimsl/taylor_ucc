@@ -3,7 +3,14 @@ channels:
 dependencies:
     # Base depends
   - python
-  - pip
+  - pip:
+    - pyscf
+    - opt_einsum
+    - gitpython
+    - psutil
+
+  - numpy
+  - scipy
 
 
 
