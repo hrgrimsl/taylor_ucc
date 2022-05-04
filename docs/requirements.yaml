@@ -8,6 +8,7 @@ dependencies:
     - opt_einsum
     - gitpython
     - psutil
+    - sphinx-autoapi
 
   - numpy
   - scipy
