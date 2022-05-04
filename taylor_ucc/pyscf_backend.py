@@ -42,7 +42,7 @@ def semicanonicalize(H, I, C, nocc):
     C[:,nocc:] = C[:,nocc:]@vv
     return C
 
-def integrals(geometry, basis, reference, charge, unpaired, conv_tol, Ca_guess, Cb_guess, read = False, do_ci = False, do_ccsd = True, do_ccsdt = True, loc = None, do_hci = False, var_only = False, eps_var = 5e-5, save = False, chkfile = None, memory = 8e3, pseudo_canonicalize = False, manual_C = None):
+def integrals(geometry, basis, reference, charge, unpaired, conv_tol, read = False, do_ccsd = True, do_ccsdt = True, chkfile = None, semi_canonical = False, manual_C = None):
     mol = gto.M(atom = geometry, basis = basis, charge = charge, spin = unpaired)
     print("\nSystem geometry:")
     print(geometry)
@@ -53,11 +53,6 @@ def integrals(geometry, basis, reference, charge, unpaired, conv_tol, Ca_guess, 
     mol.build()
     if reference == "rhf":
         mf = scf.RHF(mol)
-    elif reference == "uhf":
-        mf = scf.UHF(mol)
-    elif reference == "rohf":
-        print("Contractions not programmed- we assume Fa and Fb are diagonal.")
-        exit()
     else:
         print("Reference not understood.")
         exit()
@@ -78,33 +73,6 @@ def integrals(geometry, basis, reference, charge, unpaired, conv_tol, Ca_guess, 
     hf_energy = mf.kernel()
     
     assert mf.converged == True
-
-    if do_ci == True:
-        cisolver = fci.FCI(mol, mf.mo_coeff)
-        ci_energy = cisolver.kernel()[0]
-    else:
-        ci_energy = None
-
-
-    hci_energy = None
-    if do_hci == True and reference == "rhf":
-        norb = mf.mo_coeff.shape[1]
-        nelec = mol.nelec
-        h1 = mf.mo_coeff.T.dot(mf.get_hcore()).dot(mf.mo_coeff)
-        h2 = ao2mo.full(mol, mf.mo_coeff)
-        mol.verbose = 100
-        fcisolver = cornell_shci.SHCI(mol = mol)
-        fcisolver.config['var_only'] = var_only
-        #fcisolver.config['target_error'] = eps_var*1e-2
-        fcisolver.config['eps_var_schedule'] = {}
-        fcisolver.config['eps_pt'] = 1e-10
-        fcisolver.config['eps_vars'] = [copy.copy(eps_var)]
-        fcisolver.verbose = 100
-        hci_energy, roots = fcisolver.kernel(h1, h2, norb, nelec, verbose = 100)
-        hci_energy += mol.energy_nuc()
-        #ofile = open("output.dat", "r")
-        #for line in ofile.readlines():
-        #    print(line[:-1])
 
     E_nuc = mol.energy_nuc()
     S = mol.intor('int1e_ovlp_sph')
@@ -135,79 +103,11 @@ def integrals(geometry, basis, reference, charge, unpaired, conv_tol, Ca_guess, 
 
         Ca = copy.copy(mf.mo_coeff)
         Cb = copy.copy(mf.mo_coeff)
-
-
-        #for col in range(0, Ca.shape[0]):
-        #    if Ca[0,col] < 0:
-        #        Ca[:,col] *= -1
-        #        Cb[:,col] *= -1
-
-        #rt_S = (scipy.linalg.sqrtm(S))      
-
-
-        if loc is not None and loc == 'pm':
-            print("\nDoing Pipek-Mizey localization...\n")
-            Ca[:,:Oa] = Cb[:,:Ob] = lo.pipek.PM(mol).kernel(mf.mo_coeff[:,:Oa])
-            Ca[:,Oa:] = Cb[:,Ob:] = lo.pipek.PM(mol).kernel(mf.mo_coeff[:,Oa:])
-
-        if loc is not None and loc == 'subspace_natural':
-            #Probably wrong
-            print("\nGetting quasi-natural MP2 orbitals...\n")
-
-            pt = mp.MP2(mf)
-            pt.conv_tol = conv_tol
-            pt.kernel(mf.mo_energy, mf.mo_coeff) 
-            rdm1 = pt.make_rdm1(ao_repr = False)
-
-            occ_ds, occ_U = np.linalg.eigh(rdm1[:Oa,:Oa])
-            occ_idx = np.argsort(occ_ds)[::-1]
-            vir_ds, vir_U = np.linalg.eigh(rdm1[Oa:,Oa:]) 
-            vir_idx = np.argsort(vir_ds)[::-1]
-            Ca[:,:Oa] = Cb[:,:Ob] = Ca[:,:Oa].dot(occ_U[:,occ_idx])
-            Ca[:,Oa:] = Cb[:hOb:] = Ca[:,Oa:].dot(vir_U[:,vir_idx])
-            
-            Ha = Ca.T.dot(H_core).dot(Ca)
-            Hb = Cb.T.dot(H_core).dot(Cb)
-            Iaa = contract('pqrs,pi,qj,rk,sl->ikjl', I, Ca, Ca, Ca, Ca)
-            Iab = contract('pqrs,pi,qj,rk,sl->ikjl', I, Ca, Ca, Cb, Cb)
-            Ibb = contract('pqrs,pi,qj,rk,sl->ikjl', I, Cb, Cb, Cb, Cb)
-            Ja = contract('pqrs,qs->pr', Iaa, Da)+contract('pqrs,qs->pr', Iab, Db)
-            Jb = contract('pqrs,qs->pr', Ibb, Db)+contract('pqrs,pr->qs', Iab, Da)
-            Ka = contract('pqsr,qs->pr', Iaa, Da)
-            Kb = contract('pqsr,qs->pr', Ibb, Db) 
-            Fa = Ha + Ja - Ka
-            Fb = Hb + Jb - Kb
-            mf = scf.RHF(mol)
-            mf.mo_coeff = copy.copy(Ca)
-            mf.mo_occ = mo_occ
-            pt = mp.MP2(mf)
-            pt.conv_tol = conv_tol
-            pt.kernel(mf.mo_energy, mf.mo_coeff) 
-            rdm1 = pt.make_rdm1(ao_repr = False)
-            off_diag = np.amax(abs(rdm1[:Oa,:Oa] - np.diag(np.diag(rdm1[:Oa,:Oa])))) + np.amax(abs(rdm1[Oa:,Oa:] - np.diag(np.diag(rdm1[Oa:,Oa:]))))
-            assert off_diag < 1e-6
         
-    else:
-        Ca = mf.mo_coeff[0]
-        Cb = mf.mo_coeff[1]
-        mo_a = np.zeros(len(mo_occ[0]))
-        mo_b = np.zeros(len(mo_occ[1]))
-        for i in range(0, len(mo_occ[0])):
-            if mo_occ[0][i] == 1:
-                mo_a[i] = 1
-                Oa += 1
-            else:
-                Va += 1
-        for i in range(0, len(mo_occ[1])):
-            if mo_occ[1][i] == 1:
-                mo_b[i] = 1
-                Ob += 1
-            else:
-                Vb += 1
-
     if manual_C is not None:
         Ca = copy.copy(manual_C)
         Cb = copy.copy(manual_C) 
+
     print(f"{Oa + Ob} electrons.")
     print(f"{Oa + Ob + Va + Vb} spin-orbitals.")
     Da = np.diag(mo_a) 
@@ -224,7 +124,7 @@ def integrals(geometry, basis, reference, charge, unpaired, conv_tol, Ca_guess, 
     Fa = Ha + Ja - Ka
     Fb = Hb + Jb - Kb
 
-    if pseudo_canonicalize == True :
+    if semi_canonical == True :
         Ca = semicanonicalize(H_core, I, Ca, Oa)
         Cb = semicanonicalize(H_core, I, Cb, Ob)
         Fa = compute_mo_F(H_core, I, Ca, Oa)
@@ -243,10 +143,7 @@ def integrals(geometry, basis, reference, charge, unpaired, conv_tol, Ca_guess, 
     print(f"Norm of Fa[o,v] :       {np.linalg.norm(Fa[:Oa,Oa:]):20.16e}")
     delta_ref = manual_energy - hf_energy
     hf_energy = manual_energy
-    if reference == "rhf":
-        vec_shape = (Va*Oa, Va*Oa, int(Va*(Va-1)*Oa*(Oa-1)/4), Va*Va*Oa*Oa, int(Va*(Va-1)*Oa*(Oa-1)/4))
-    else:
-        vec_shape = (Va*Oa, Vb*Ob, int(Va*(Va-1)*Oa*(Oa-1)/4), Va*Vb*Oa*Ob, int(Vb*(Vb-1)*Ob*(Ob-1)/4))
+    vec_shape = (Va*Oa, Vb*Ob, int(Va*(Va-1)*Oa*(Oa-1)/4), Va*Vb*Oa*Ob, int(Vb*(Vb-1)*Ob*(Ob-1)/4))
 
     
     if do_ccsd == True or do_ccsdt == True and reference == 'rhf':
@@ -254,14 +151,11 @@ def integrals(geometry, basis, reference, charge, unpaired, conv_tol, Ca_guess, 
             start = time.time()
             mf.mo_coeff = copy.copy(Ca)
             mf.mo_energy = np.diag(Fa)
-
-
             mycc = cc.CCSD(mf, mo_coeff = Ca)
             mycc.max_cycle = 10000
             mycc.conv_tol = conv_tol
             mycc.verbose = 4        
             mycc.frozen = 0
-
             ccsd_energy = mycc.kernel(eris = mycc.ao2mo(mo_coeff = Ca))[0] + hf_energy 
             assert mycc.converged == True
             t1_norm = np.sqrt(2*contract('ia,ia->', mycc.t1, mycc.t1))
@@ -278,7 +172,6 @@ def integrals(geometry, basis, reference, charge, unpaired, conv_tol, Ca_guess, 
             print(f"Converged CCSD Energy (a.u.): {ccsd_energy}")
         except:
             ccsd_energy = None
-            
     else:
         ccsd_energy = None
 
@@ -294,13 +187,8 @@ def integrals(geometry, basis, reference, charge, unpaired, conv_tol, Ca_guess, 
     else:
         ccsdt_energy = None
 
-    if save == True:
-        np.save("C", Ca)
-        np.save("H", H_core)
-        np.save("eps", np.diag(Fa))
-        with open('scr.molden', 'w') as f1:
-            molden.header(mol, f1)
-            molden.orbital_coeff(mol, f1, Ca, occ = mf.mo_occ)
-    return vec_shape, hf_energy, ci_energy, ccsd_energy, ccsdt_energy, hci_energy, Fa, Fb, Iaa, Iab, Ibb, Oa, Ob, Va, Vb, Ca, Cb, S
+
+
+    return vec_shape, hf_energy, ccsd_energy, ccsdt_energy, Fa, Fb, Iaa, Iab, Ibb, Oa, Ob, Va, Vb, Ca, Cb
 
 

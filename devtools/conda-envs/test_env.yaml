@@ -2,12 +2,20 @@ name: test
 channels:
 
   - conda-forge
-
   - defaults
+
 dependencies:
     # Base depends
   - python
-  - pip
+  - pip:
+    - pyscf  
+    - opt_einsum
+    - gitpython
+    - psutil
+
+    #Package dependencies
+  - numpy
+  - scipy
 
     # Testing
   - pytest
