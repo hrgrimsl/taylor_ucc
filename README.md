@@ -7,9 +7,9 @@ taylor_ucc
 
 Truncated UCCSD methods
 
--D1 is reported for all methods but I'm not sure it's right when computed manually
+- D1 is reported for all methods but I'm not sure it's right when computed manually
 
--Test/example file is tests/test_h4.py
+- Test/example file is tests/test_h4.py
 
 Documentation of the API is available at
 
