@@ -9,7 +9,6 @@ dependencies:
   - python
   - pip
     - pyscf
-    - python-git
     - opt_einsum
 
     #Package dependencies
