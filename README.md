@@ -2,7 +2,7 @@ taylor_ucc
 ==============================
 [//]: # (Badges)
 [![GitHub Actions Build Status](https://github.com/hrgrimsl/taylor_ucc/workflows/CI/badge.svg)](https://github.com/hrgrimsl/taylor_ucc/actions?query=workflow%3ACI)
-[![codecov](https://codecov.io/gh/hrgrimsl/taylor_ucc/branch/master/graph/badge.svg)](https://codecov.io/gh/hrgrimsl/taylor_ucc/branch/master)
+[![codecov](https://codecov.io/gh/hrgrimsl/taylor_ucc/branch/master/graph/badge.svg)](https://codecov.io/gh/hrgrimsl/taylor_ucc/branch/main)
 
 
 Truncated UCCSD methods
