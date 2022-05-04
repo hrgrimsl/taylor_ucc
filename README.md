@@ -11,6 +11,10 @@ Truncated UCCSD methods
 
 -Test/example file is tests/test_h4.py
 
+Documentation of the API is available at
+
+ https://taylor-ucc.readthedocs.io/en/latest/
+
 ### Copyright
 
 Copyright (c) 2022, Harper Grimsley
