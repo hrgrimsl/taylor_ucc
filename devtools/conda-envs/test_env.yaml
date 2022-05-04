@@ -8,8 +8,7 @@ dependencies:
     # Base depends
   - python
   - pip
-    - pyscf
-    - opt_einsum
+    - pyscf=2.0
 
     #Package dependencies
   - numpy
