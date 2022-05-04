@@ -10,9 +10,11 @@ dependencies:
   - pip
 
     #Package dependencies
-  - numpy
   - pyscf
-
+  - numpy
+  - opt_einsum
+  - scipy
+  - python-git
 
     # Testing
   - pytest
