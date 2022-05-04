@@ -10,7 +10,7 @@ dependencies:
   - pip:
     - pyscf  
     - opt_einsum
-    - python-git
+    - gitpython
     - psutil
 
     #Package dependencies
