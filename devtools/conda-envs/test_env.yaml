@@ -12,8 +12,7 @@ dependencies:
     #Package dependencies
   - numpy
   - pyscf
-  - opt_einsum
-  - scipy
+
 
     # Testing
   - pytest
