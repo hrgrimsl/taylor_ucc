@@ -59,31 +59,6 @@ class molecule():
 
     n_singles, n_doubles: int
         Number of single and double exciations
-       
-
-
-    Methods
-    -------
-    canonical_mp2(self)
-        Computes the MP2 energy assuming canonical orbitals
-
-    hylleraas_mp2(self)
-        Computes the MP2 energy iteratively
-
-    cisd(self)
-        Computes the CISD energy
-
-    lccsd(self, tol = 1e-6):
-        Computes the LCCSD energy.
-    
-    o2d2_uccsd(self, tol = 1e-6, trotter = False):
-        Computes the O2D2_UCCSD energy.
-
-    o2d3_uccsd(self, guess = 'hf', trotter = False, tol = 1e-5):
-        Computes the O2D3_UCCSD energy.
-
-    o2di_uccsd(self, guess = 'hf', trotter = False, tol = 1e-5):
-        Computes the O2D-Infinity UCCSD energy.
     """
 
     def __init__(self, geometry, basis, reference, charge = 0, unpaired = 0, conv_tol = 1e-12, read = False, ccsd = False, ccsdt = False, chkfile = None, semi_canonical = False, manual_C = None, loc = False):
@@ -94,7 +69,8 @@ class molecule():
         print(f"Git revision:\ngithub.com/hrgrimsl/PYSCF_UCC/commit/{sha}")
 
         #PySCF computation
-        self.vec_structure, self.hf, self.ccsd_energy, self.ccsdt_energy, self.Fa, self.Fb, self.Iaa, self.Iab, self.Ibb, self.noa, self.nob, self.nva, self.nvb, self.Ca, self.Cb = integrals(geometry, basis, reference, charge, unpaired, conv_tol, read = read, do_ccsd = ccsd, do_ccsdt = ccsdt, chkfile = chkfile, semi_canonical = semi_canonical, manual_C = manual_C)
+        results = integrals(geometry, basis, reference, charge, unpaired, conv_tol, read = read, do_ccsd = ccsd, do_ccsdt = ccsdt, chkfile = chkfile, semi_canonical = semi_canonical, manual_C = manual_C)
+        self.vec_structure, self.hf, self.ccsd_energy, self.ccsdt_energy, self.Fa, self.Fb, self.Iaa, self.Iab, self.Ibb, self.noa, self.nob, self.nva, self.nvb, self.Ca, self.Cb = results
 
         self.N = self.noa + self.nob
         self.reference = reference
@@ -135,6 +111,9 @@ class molecule():
     #------------------------
 
     def canonical_mp2(self):
+        """
+        Computes the MP2 energy and associated amplitudes using canonical orbitals
+        """
         print("\n***Canonical MP2***\n")
         x = -self.Finv_op(self.g)
         energy = self.hf + self.g.T.dot(x)
@@ -154,6 +133,9 @@ class molecule():
         return energy, x
          
     def hylleraas_mp2(self, tol = 1e-12): 
+        """
+        Computes the MP2 energy and associated amplitudes iteratively for any orbitals
+        """ 
         #Does iterative MP2
         self.times = [time.time()]
         print("\n***Hylleraas MP2***\n")
@@ -214,6 +196,9 @@ class molecule():
         return energy, x
 
     def cisd(self):
+        """
+        Computes the CISD energy and associated amplitudes
+        """ 
         print("Doing CISD.")
         #Do CISD
         Aop = LinearOperator((self.vec_size+1, self.vec_size+1), matvec = self.CISD_H, rmatvec = self.CISD_H)
@@ -223,6 +208,9 @@ class molecule():
         return E[0], v
 
     def lccsd(self, tol = 1e-6):        
+        """
+        Computes the LCCSD energy and associated amplitudes
+        """ 
         self.times = [time.time()]
         print("\n***LCCSD***\n")
         print("Conjugate Gradient Convergence:\n")
@@ -259,6 +247,9 @@ class molecule():
         return energy, x
 
     def o2d2_uccsd(self, tol = 1e-6, trotter = False):
+        """
+        Computes the O2D2-UCCSD energy and associated amplitudes
+        """ 
         self.times = [time.time()]
         print("\n***UCCSD2***\n")
         print("Conjugate Gradient Convergence:\n")
@@ -302,6 +293,9 @@ class molecule():
         return energy, x
 
     def o2d3_uccsd(self, guess = 'hf', trotter = False, tol = 1e-5):
+        """
+        Computes the O2D3-UCCSD energy and associated amplitudes
+        """ 
         self.trotter = copy.copy(trotter)
         self.iteration = 0
         self.times = [time.time()]
@@ -330,6 +324,9 @@ class molecule():
         return energy, x 
 
     def o2di_uccsd(self, guess = 'hf', trotter = False, tol = 1e-5):
+        """
+        Computes the O2D-Infinity-UCCSD energy and associated amplitudes
+        """ 
         self.trotter = copy.copy(trotter)
         self.iteration = 0
         self.times = [time.time()]

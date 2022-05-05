@@ -13,6 +13,8 @@ taylor_ucc is a Python package for computing single-point energies of molecules 
    :caption: Contents:
 
    getting_started
+   theory
+   examples
 
 
 
