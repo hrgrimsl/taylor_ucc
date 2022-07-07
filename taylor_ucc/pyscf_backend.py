@@ -71,7 +71,8 @@ def integrals(geometry, basis, reference, charge, unpaired, conv_tol, read = Fal
         mf.init_guess = 'atom'
 
     hf_energy = mf.kernel()
-    
+    mf.stability(external = True)
+ 
     assert mf.converged == True
 
     E_nuc = mol.energy_nuc()
